@@ -1,0 +1,75 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  username  String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+
+  transactions Transaction[]
+
+  @@map("users")
+}
+
+model Event {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?  @db.Text
+  location    String
+  startDate   DateTime @map("start_date")
+  endDate     DateTime @map("end_date")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  tickets Ticket[]
+
+  @@index([location, startDate])
+  @@map("events")
+}
+
+model Ticket {
+  id             Int      @id @default(autoincrement())
+  eventId        Int      @map("event_id")
+  event          Event    @relation(fields: [eventId], references: [id])
+  price          Decimal
+  ticketType     String   @map("ticket_type")
+  createdAt      DateTime @default(now()) @map("created_at")
+  quota          Int
+  remainingQuota Int      @map("remaining_quota")
+  version        Int      @default(0)
+
+  transactions Transaction[]
+
+  @@index([eventId])
+  @@map("tickets")
+}
+
+model Transaction {
+  id         Int      @id @default(autoincrement())
+  ticketId   Int      @map("ticket_id")
+  ticket     Ticket   @relation(fields: [ticketId], references: [id])
+  status     String
+  basePrice  Decimal  @map("base_price")
+  userId     Int      @map("user_id")
+  user       User     @relation(fields: [userId], references: [id])
+  createdAt  DateTime @default(now()) @map("created_at")
+  discount   Decimal
+  totalPrice Decimal  @map("total_price")
+  quantity   Int
+  expiredAt  DateTime @map("expired_at")
+
+  @@map("transactions")
+}
