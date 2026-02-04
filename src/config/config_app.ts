@@ -16,6 +16,8 @@ export const configApp = {
   },
   jwt: {
     secret: process.env.JWT_SECRET || "secret",
-    expiresIn: process.env.JWT_EXPIRES_IN || "1d",
+    expiresIn: process.env.JWT_EXPIRES_IN || 1,
   },
 };
+
+console.log("Config loaded:", configApp.jwt);
