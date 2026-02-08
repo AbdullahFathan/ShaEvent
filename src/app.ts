@@ -4,6 +4,7 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import userRoutes from "./routes/user_routes";
+import eventRoutes from "./routes/event_routes";
 
 const app: Express = express();
 const port = process.env.PORT || 4000;
@@ -18,6 +19,7 @@ app.get("/check", (req: Request, res: Response) => {
 });
 
 app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/events", eventRoutes);
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
