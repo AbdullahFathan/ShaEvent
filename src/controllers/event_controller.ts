@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { EventService } from "../services/event_services";
 import { Request, Response } from "express";
+import { sendError, sendSuccess } from "../utils/response";
 
 const createEventSchema = z.object({
   name: z.string().min(3),
@@ -28,20 +29,13 @@ export class EventController {
 
       const event = await this.eventService.createEvent(validatedData);
 
-      res.status(200).json({
-        success: true,
-        data: event,
-      });
+      return sendSuccess(res, event, "Event created successfully", 201);
     } catch (error: any) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ errors: error.message });
+        return sendError(res, "Validation Error", 400, error.flatten());
       }
 
-      res.status(500).json({
-        success: false,
-        message: "Internal Server Error",
-        error: error,
-      });
+      return sendError(res, "Internal Server Error", 500, error);
     }
   }
 
@@ -49,16 +43,9 @@ export class EventController {
     try {
       const events = await this.eventService.getAllEvent();
 
-      res.status(200).json({
-        success: true,
-        data: events,
-      });
+      return sendSuccess(res, events, "Events retrieved successfully");
     } catch (error: any) {
-      res.status(500).json({
-        success: false,
-        message: "Internal Server Error",
-        error: error,
-      });
+      return sendError(res, "Internal Server Error", 500, error);
     }
   }
 }

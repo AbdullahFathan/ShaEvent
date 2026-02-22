@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import { sendError } from "../utils/response";
 
 export function errorHandler(
   err: any,
@@ -7,5 +8,5 @@ export function errorHandler(
   next: NextFunction,
 ) {
   console.error(err.stack);
-  res.status(500).json({ message: "Internal Server Error" });
+  return sendError(res, "Internal Server Error", 500, err.message);
 }
