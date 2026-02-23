@@ -2,15 +2,16 @@ import { Request, Response } from "express";
 import { z } from "zod";
 import { UserServices } from "../services/user_services";
 import { AuthRequest } from "../middlewares/auth_middleware";
+import { sendError, sendSuccess } from "../utils/response";
 
 const registerSchema = z.object({
-  email: z.email(),
+  email: z.string().email(),
   username: z.string().min(3),
   password: z.string().min(6),
 });
 
 const loginSchema = z.object({
-  email: z.email(),
+  email: z.string().email(),
   password: z.string().min(1),
 });
 
@@ -22,24 +23,19 @@ export class UserController {
       const validated = registerSchema.parse(req.body);
 
       const result = await this.userServices.register(validated);
-      return res.status(201).json({ data: result });
+      return sendSuccess(res, result, "Registration successful", 201);
     } catch (error: any) {
-      console.log(error);
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ errors: error.message });
+        return sendError(res, "Validation Error", 400, error.flatten());
       }
       if (
         error.message === "Email already registered" ||
         error.message === "User already exists"
       ) {
-        return res.status(409).json({ success: false, message: error.message });
+        return sendError(res, error.message, 409);
       }
 
-      res.status(500).json({
-        success: false,
-        message: "Internal Server Error",
-        error: error,
-      });
+      return sendError(res, "Internal Server Error", 500, error);
     }
   }
 
@@ -48,43 +44,36 @@ export class UserController {
       const validated = loginSchema.parse(req.body);
 
       const result = await this.userServices.login(validated);
-      return res.status(200).json({ data: result });
+      return sendSuccess(res, result, "Login successful");
     } catch (error: any) {
-      console.log(error);
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ errors: error.message });
+        return sendError(res, "Validation Error", 400, error.flatten());
       }
       if (
         error.message === "User not found" ||
         error.message === "Invalid password"
       ) {
-        return res.status(401).json({ success: false, message: error.message });
+        return sendError(res, error.message, 401);
       }
 
-      res.status(500).json({
-        success: false,
-        message: "Internal Server Error",
-        error: error,
-      });
+      return sendError(res, "Internal Server Error", 500, error);
     }
   }
 
   async me(req: AuthRequest, res: Response) {
-    // Sekarang TypeScript tahu bahwa 'req.user' itu ada!
     const user = req.user;
 
-    // Safety check (jaga-jaga kalau middleware bolong)
     if (!user) {
-      return res.status(401).json({ message: "User data not found" });
+      return sendError(res, "User data not found", 401);
     }
 
-    res.status(200).json({
-      success: true,
-      data: user,
-    });
+    return sendSuccess(res, user, "User profile retrieved successfully");
   }
 
-  async logout(req: Request, res: Response) {}
+  async logout(req: Request, res: Response) {
+    // Implementation for logout if needed
+    return sendSuccess(res, null, "Logout successful");
+  }
 
   async getProfile(req: Request, res: Response) {}
 

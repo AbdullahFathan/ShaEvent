@@ -1,6 +1,7 @@
 import { EventRepository } from "../repositories/event_repositories";
 import { CreateEventInput } from "../dto/event_dto";
 import { Event } from "../../prisma/generated/prisma/client";
+import { redisClient } from "../config/redis";
 
 export class EventService {
   eventRepo = new EventRepository();
@@ -18,7 +19,15 @@ export class EventService {
   }
 
   async getAllEvent(): Promise<Event[]> {
+    const cacheKey = "all_events";
+    const cachedEvents = await redisClient.get(cacheKey);
+    if (cachedEvents) {
+      return JSON.parse(cachedEvents);
+    }
     const events = await this.eventRepo.getAllEvent();
+    await redisClient.set(cacheKey, JSON.stringify(events), {
+      EX: 10,
+    });
     return events;
   }
 }
