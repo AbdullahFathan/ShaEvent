@@ -7,6 +7,8 @@ import userRoutes from "./routes/user_routes";
 import eventRoutes from "./routes/event_routes";
 import transactionRoutes from "./routes/transaction_route";
 import { PaymentExpiryJob } from "./jobs/payment_expired_job";
+import { connectRedis } from "./config/redis";
+import { setupSwagger } from "./config/swagger";
 
 const app: Express = express();
 const port = process.env.PORT || 4000;
@@ -18,9 +20,13 @@ app.use(express.json());
 
 PaymentExpiryJob.start();
 
+connectRedis().catch(console.error);
+
 app.get("/check", (req: Request, res: Response) => {
   res.status(200).json({ message: "Server is running" });
 });
+
+setupSwagger(app);
 
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/events", eventRoutes);

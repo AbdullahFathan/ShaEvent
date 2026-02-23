@@ -13,6 +13,7 @@ export const configApp = {
   },
   redis: {
     port: process.env.REDIS_PORT || 6989,
+    host: process.env.REDIS_HOST || "localhost",
   },
   jwt: {
     secret: process.env.JWT_SECRET || "secret",
