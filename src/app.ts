@@ -6,6 +6,7 @@ import morgan from "morgan";
 import userRoutes from "./routes/user_routes";
 import eventRoutes from "./routes/event_routes";
 import transactionRoutes from "./routes/transaction_route";
+import { PaymentExpiryJob } from "./jobs/payment_expired_job";
 
 const app: Express = express();
 const port = process.env.PORT || 4000;
@@ -14,6 +15,8 @@ app.use(cors());
 app.use(helmet());
 app.use(morgan("dev"));
 app.use(express.json());
+
+PaymentExpiryJob.start();
 
 app.get("/check", (req: Request, res: Response) => {
   res.status(200).json({ message: "Server is running" });
