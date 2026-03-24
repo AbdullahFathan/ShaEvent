@@ -39,6 +39,7 @@ export class EventRepository implements IEventRepository {
             price: true,
             remainingQuota: true,
             ticketType: true,
+            id: true,
           },
         },
       },
