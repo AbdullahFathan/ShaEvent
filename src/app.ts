@@ -23,7 +23,12 @@ PaymentExpiryJob.start();
 connectRedis().catch(console.error);
 
 app.get("/check", (req: Request, res: Response) => {
-  res.status(200).json({ message: "Server is running" });
+  res
+    .status(200)
+    .json({
+      message: "Server is running",
+      timestamp: new Date().toISOString(),
+    });
 });
 
 setupSwagger(app);
