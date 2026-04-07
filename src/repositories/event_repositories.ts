@@ -3,12 +3,15 @@ import { Event } from "../../prisma/generated/prisma/client";
 import { prismaApp } from "../config/prisma";
 
 interface IEventRepository {
-  createEvent(event: CreateEventInput): Promise<Event>;
+  createEvent(event: CreateEventInput, imageUrl: string | null): Promise<Event>;
   getAllEvent(): Promise<Event[]>;
 }
 
 export class EventRepository implements IEventRepository {
-  async createEvent(event: CreateEventInput): Promise<Event> {
+  async createEvent(
+    event: CreateEventInput,
+    imageUrl: string | null,
+  ): Promise<Event> {
     return await prismaApp.event.create({
       data: {
         name: event.name,
@@ -16,6 +19,7 @@ export class EventRepository implements IEventRepository {
         location: event.location,
         startDate: event.startDate,
         endDate: event.endDate,
+        imageUrl: imageUrl,
         tickets: {
           create: event.tickets.map((ticket) => ({
             ticketType: ticket.ticketType,

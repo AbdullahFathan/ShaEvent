@@ -2,11 +2,15 @@ import { EventRepository } from "../repositories/event_repositories";
 import { CreateEventInput } from "../dto/event_dto";
 import { Event } from "../../prisma/generated/prisma/client";
 import { redisClient } from "../config/redis";
+import { uploadImageToCloudinary } from "../utils/upload_files";
 
 export class EventService {
   eventRepo = new EventRepository();
 
-  async createEvent(event: CreateEventInput): Promise<Event> {
+  async createEvent(
+    event: CreateEventInput,
+    file: Express.Multer.File | undefined,
+  ): Promise<Event> {
     const startDate = new Date(event.startDate);
     const endDate = new Date(event.endDate);
 
@@ -14,7 +18,13 @@ export class EventService {
       throw new Error("End date must be after start date");
     }
 
-    const newEvent = await this.eventRepo.createEvent(event);
+    let imageUrl = null;
+
+    if (file) {
+      imageUrl = await uploadImageToCloudinary(file.buffer, "shaevent-posters");
+    }
+
+    const newEvent = await this.eventRepo.createEvent(event, imageUrl);
     return newEvent;
   }
 

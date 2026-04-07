@@ -19,6 +19,11 @@ export const configApp = {
     secret: process.env.JWT_SECRET || "secret",
     expiresIn: process.env.JWT_EXPIRES_IN || 1,
   },
+  cloudinary: {
+    cloudName: process.env.CLOUDINARY_CLOUD_NAME || "",
+    apiKey: process.env.CLOUDINARY_API_KEY || "",
+    apiSecret: process.env.CLOUDINARY_API_SECRET || "",
+  },
 };
 
 console.log("Config loaded:", configApp.jwt);

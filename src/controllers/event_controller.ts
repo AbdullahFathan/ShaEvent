@@ -9,15 +9,27 @@ const createEventSchema = z.object({
   location: z.string().min(3),
   startDate: z.coerce.date(),
   endDate: z.coerce.date(),
-  tickets: z
-    .array(
-      z.object({
-        ticketType: z.string().min(1),
-        price: z.number().min(0),
-        quota: z.number().min(1),
-      }),
-    )
-    .min(1),
+  tickets: z.preprocess(
+    (val) => {
+      if (typeof val === "string") {
+        try {
+          return JSON.parse(val);
+        } catch (error) {
+          return val;
+        }
+      }
+      return val;
+    },
+    z
+      .array(
+        z.object({
+          ticketType: z.string().min(1),
+          price: z.coerce.number().min(0),
+          quota: z.coerce.number().min(1),
+        }),
+      )
+      .min(1),
+  ),
 });
 
 export class EventController {
@@ -27,7 +39,9 @@ export class EventController {
     try {
       const validatedData = createEventSchema.parse(req.body);
 
-      const event = await this.eventService.createEvent(validatedData);
+      const file = req.file;
+
+      const event = await this.eventService.createEvent(validatedData, file);
 
       return sendSuccess(res, event, "Event created successfully", 201);
     } catch (error: any) {
